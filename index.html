@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Master</title>
+    <!-- Add favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;,">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Auth Section -->
+        <div class="auth-container" id="authContainer">
+            <div class="auth-box">
+                <h2>Chat Master</h2>
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Login</button>
+                    <button class="auth-tab" data-tab="signup">Sign Up</button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form">
+                    <input type="email" placeholder="Email" required>
+                    <input type="password" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signupForm" class="auth-form hidden">
+                    <input type="text" placeholder="Full Name" required>
+                    <input type="email" placeholder="Email" required>
+                    <input type="password" placeholder="Password" required>
+                    <input type="tel" placeholder="Mobile Number" required>
+                    <button type="submit">Sign Up</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Chat Interface -->
+        <div class="chat-container hidden" id="chatContainer">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Add Status/Story Section -->
+                <div class="status-container">
+                    <div class="status-list" id="statusList">
+                        <div class="status-item" onclick="createNewStatus()">
+                            <div class="status-ring">
+                                <img src="https://ui-avatars.com/api/?name=Me&background=random" 
+                                     alt="My Status" class="status-pic">
+                            </div>
+                            <div class="status-text">My Status</div>
+                        </div>
+                        <!-- Other status items will be added dynamically -->
+                    </div>
+                </div>
+
+                <div class="sidebar-header">
+                    <div class="user-profile">
+                        <img src="https://ui-avatars.com/api/?name=User&background=random" alt="Profile" class="profile-pic">
+                        <span class="user-name">Loading...</span>
+                    </div>
+                    <div class="header-actions">
+                        <button id="themeToggle"><i class="fas fa-moon"></i></button>
+                        <button id="settingsBtn"><i class="fas fa-cog"></i></button>
+                    </div>
+                </div>
+                
+                <div class="user-search">
+                    <input type="text" placeholder="Search users..." id="userSearch">
+                </div>
+                
+                <div class="chat-list" id="chatList">
+                    <!-- Chat list items will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div class="chat-area" id="chatArea">
+                <div class="chat-header">
+                    <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+                    <div class="chat-user-info">
+                        <img src="https://ui-avatars.com/api/?name=Contact&background=random" alt="Contact" class="profile-pic">
+                        <div class="user-details">
+                            <span class="contact-name">Select a chat</span>
+                            <span class="user-status">offline</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Typing Indicator -->
+                <div class="typing-indicator hidden" id="typingIndicator">
+                    <span>typing</span>
+                    <div class="typing-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+
+                <div class="messages-container" id="messagesContainer">
+                    <!-- Messages will be dynamically added here -->
+                </div>
+
+                <!-- Enhanced Chat Input Area -->
+                <div class="chat-input-area">
+                    <button id="attachmentBtn"><i class="fas fa-paperclip"></i></button>
+                    <button id="emojiBtn"><i class="fas fa-smile"></i></button>
+                    <div class="input-wrapper">
+                        <div class="format-buttons">
+                            <button title="Bold" onclick="formatText('bold')">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                            <button title="Italic" onclick="formatText('italic')">
+                                <i class="fas fa-italic"></i>
+                            </button>
+                            <button title="Code" onclick="formatText('code')">
+                                <i class="fas fa-code"></i>
+                            </button>
+                        </div>
+                        <div id="messageInput" contenteditable="true" 
+                             placeholder="Type a message..."></div>
+                        <button id="voiceRecordBtn">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel hidden" id="settingsPanel">
+            <div class="settings-header">
+                <h3>Settings</h3>
+                <button id="closeSettings"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <span>Notifications</span>
+                    <label class="switch">
+                        <input type="checkbox" id="notificationToggle">                        npm init -y
+                        npm install express                        node server.js                        http://localhost:3000
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span>Sound Effects</span>
+                    <label class="switch">
+                        <input type="checkbox" id="soundToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Story Viewer Modal -->
+    <div class="story-viewer hidden" id="storyViewer">
+        <div class="story-content">
+            <div class="story-header">
+                <div class="story-user-info">
+                    <img src="" alt="" class="story-user-pic">
+                    <span class="story-username"></span>
+                </div>
+                <button class="close-story"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="story-media"></div>
+            <div class="story-progress"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-storage-compat.js"></script>
+    <!-- Initialize Firebase first -->
+    <script src="firebase-init.js"></script>
+    <!-- Then load your app script -->
+    <script src="script.js"></script>
+</body>
+</html>
