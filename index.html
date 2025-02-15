@@ -78,6 +78,7 @@
 
             <!-- Main Chat Area -->
             <div class="chat-area" id="chatArea">
+                <!-- Update chat header -->
                 <div class="chat-header">
                     <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
                     <div class="chat-user-info">
@@ -85,6 +86,20 @@
                         <div class="user-details">
                             <span class="contact-name">Select a chat</span>
                             <span class="user-status">offline</span>
+                        </div>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button class="more-options-btn" id="moreOptionsBtn">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="more-options-menu" id="moreOptionsMenu">
+                            <ul>
+                                <li><i class="fas fa-user"></i>View Contact</li>
+                                <li><i class="fas fa-bell-slash"></i>Mute Notifications</li>
+                                <li><i class="fas fa-search"></i>Search Messages</li>
+                                <li><i class="fas fa-trash"></i>Clear Chat</li>
+                                <li><i class="fas fa-ban"></i>Block Contact</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -103,29 +118,72 @@
                     <!-- Messages will be dynamically added here -->
                 </div>
 
-                <!-- Enhanced Chat Input Area -->
+                <!-- Quick Actions Bar (Mobile) -->
+                <div class="quick-actions">
+                    <button class="quick-action-btn">
+                        <i class="fas fa-image"></i> Photos
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-camera"></i> Camera
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-file"></i> Documents
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-location-dot"></i> Location
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-user"></i> Contact
+                    </button>
+                </div>
+
+                <!-- Update chat input area -->
                 <div class="chat-input-area">
-                    <button id="attachmentBtn"><i class="fas fa-paperclip"></i></button>
-                    <button id="emojiBtn"><i class="fas fa-smile"></i></button>
+                    <button id="emojiBtn" title="Emoji">
+                        <i class="far fa-smile"></i>
+                    </button>
+                    <button id="attachmentBtn" title="Attach">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    
                     <div class="input-wrapper">
-                        <div class="format-buttons">
-                            <button title="Bold" onclick="formatText('bold')">
-                                <i class="fas fa-bold"></i>
-                            </button>
-                            <button title="Italic" onclick="formatText('italic')">
-                                <i class="fas fa-italic"></i>
-                            </button>
-                            <button title="Code" onclick="formatText('code')">
-                                <i class="fas fa-code"></i>
-                            </button>
-                        </div>
-                        <div id="messageInput" contenteditable="true" 
-                             placeholder="Type a message..."></div>
-                        <button id="voiceRecordBtn">
-                            <i class="fas fa-microphone"></i>
-                        </button>
+                        <div id="messageInput" contenteditable="true" data-placeholder="Type a message"></div>
                     </div>
-                    <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                    
+                    <button id="voiceRecordBtn" title="Voice Message">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    
+                    <button id="sendMessageBtn" class="hidden" title="Send">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="quick-action-btn">
+                        <i class="fas fa-image"></i>
+                        <span>Photos & Videos</span>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-camera"></i>
+                        <span>Camera</span>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Document</span>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Location</span>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-user"></i>
+                        <span>Contact</span>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-poll"></i>
+                        <span>Poll</span>
+                    </button>
                 </div>
             </div>
         </div>

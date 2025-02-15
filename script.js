@@ -23,6 +23,51 @@ const settingsPanel = document.getElementById('settingsPanel');
 const closeSettings = document.getElementById('closeSettings');
 const logoutBtn = document.getElementById('logoutBtn');
 
+// More Options Menu Handler
+const moreOptionsBtn = document.getElementById('moreOptionsBtn');
+const moreOptionsMenu = document.getElementById('moreOptionsMenu');
+
+moreOptionsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    moreOptionsMenu.classList.toggle('active');
+});
+
+// Close more options menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (!moreOptionsMenu.contains(e.target) && e.target !== moreOptionsBtn) {
+        moreOptionsMenu.classList.remove('active');
+    }
+});
+
+// Handle more options menu items
+moreOptionsMenu.querySelectorAll('li').forEach(item => {
+    item.addEventListener('click', () => {
+        const action = item.textContent.trim();
+        handleMoreOptionsAction(action);
+        moreOptionsMenu.classList.remove('active');
+    });
+});
+
+function handleMoreOptionsAction(action) {
+    switch(action) {
+        case 'View Contact':
+            // Handle view contact
+            break;
+        case 'Mute Notifications':
+            // Handle mute notifications
+            break;
+        case 'Search Messages':
+            // Handle search messages
+            break;
+        case 'Clear Chat':
+            // Handle clear chat
+            break;
+        case 'Block Contact':
+            // Handle block contact
+            break;
+    }
+}
+
 // Authentication Event Listener
 auth.onAuthStateChanged((user) => {
     if (user) {
@@ -385,29 +430,105 @@ function showToast(message) {
     }, 100);
 }
 
-// Message Sending
-sendMessageBtn.addEventListener('click', sendMessage);
-messageInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
+// Handle message input
+messageInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
 });
 
-async function sendMessage() {
-    if (!messageInput.value.trim() || !currentChat) return;
+// Enable input in the contenteditable div
+messageInput.addEventListener('input', (e) => {
+    // Trigger typing indicator
+    if (!currentChat) return;
     
-    const messageData = {
-        content: messageInput.value,
-        senderId: currentUser.uid,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    db.collection('chats').doc(currentChat).update({
+        [`typing.${currentUser.uid}`]: true
+    });
+    
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+        db.collection('chats').doc(currentChat).update({
+            [`typing.${currentUser.uid}`]: false
+        });
+    }, 3000);
+});
+
+// Handle send button click
+sendMessageBtn.addEventListener('click', sendMessage);
+
+// Enhanced sendMessage function
+async function sendMessage() {
+    const messageContent = messageInput.textContent.trim();
+    
+    if (!messageContent || !currentChat) return;
     
     try {
+        // Create message data
+        const messageData = {
+            content: messageContent,
+            senderId: currentUser.uid,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            type: 'text'
+        };
+        
+        // Add message to Firestore
         await db.collection('chats').doc(currentChat)
             .collection('messages').add(messageData);
-        messageInput.value = '';
+        
+        // Clear input
+        messageInput.textContent = '';
+        
+        // Reset input height
+        messageInput.style.height = 'auto';
+        
+        // Clear typing indicator
+        if (typingTimeout) {
+            clearTimeout(typingTimeout);
+            db.collection('chats').doc(currentChat).update({
+                [`typing.${currentUser.uid}`]: false
+            });
+        }
+        
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // Update button states
+        updateSendButton();
     } catch (error) {
-        alert('Error sending message: ' + error.message);
+        console.error('Error sending message:', error);
+        showToast('Failed to send message');
     }
 }
+
+// Add function to update send button visibility
+function updateSendButton() {
+    const hasText = messageInput.textContent.trim().length > 0;
+    const voiceButton = document.getElementById('voiceRecordBtn');
+    const sendButton = document.getElementById('sendMessageBtn');
+    
+    if (hasText) {
+        voiceButton.classList.add('hidden');
+        sendButton.classList.remove('hidden');
+    } else {
+        voiceButton.classList.remove('hidden');
+        sendButton.classList.add('hidden');
+    }
+}
+
+// Add placeholder handling for the contenteditable div
+messageInput.addEventListener('focus', function() {
+    if (this.textContent.trim() === '') {
+        this.textContent = '';
+    }
+});
+
+messageInput.addEventListener('blur', function() {
+    if (this.textContent.trim() === '') {
+        this.setAttribute('placeholder', 'Message');
+    }
+});
 
 // User Status Management
 async function updateUserStatus(status) {
@@ -829,87 +950,508 @@ function initializeEnhancedFeatures() {
 // Call initialization when app starts
 document.addEventListener('DOMContentLoaded', initializeEnhancedFeatures);
 
-// Mobile Navigation Handlers
-const mobileChatsBtn = document.getElementById('mobileChatsBtn');
-const mobileStatusBtn = document.getElementById('mobileStatusBtn');
-const mobileCameraBtn = document.getElementById('mobileCameraBtn');
-const mobileSettingsBtn = document.getElementById('mobileSettingsBtn');
-
-function setActiveBottomTab(activeButton) {
-    [mobileChatsBtn, mobileStatusBtn, mobileCameraBtn, mobileSettingsBtn].forEach(btn => {
-        btn.classList.remove('active');
+// Mobile Quick Actions
+document.querySelectorAll('.quick-action-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const action = e.currentTarget.textContent.trim();
+        switch(action) {
+            case 'Photos':
+                openGallery();
+                break;
+            case 'Camera':
+                openCamera();
+                break;
+            case 'Documents':
+                openDocuments();
+                break;
+            case 'Location':
+                shareLocation();
+                break;
+            case 'Contact':
+                shareContact();
+                break;
+        }
     });
-    activeButton.classList.add('active');
-}
-
-mobileChatsBtn.addEventListener('click', () => {
-    setActiveBottomTab(mobileChatsBtn);
-    sidebar.classList.add('active');
-    settingsPanel.classList.remove('active');
-    settingsPanel.classList.add('hidden');
 });
 
-mobileStatusBtn.addEventListener('click', () => {
-    setActiveBottomTab(mobileStatusBtn);
-    // Implement status view
-});
-
-mobileCameraBtn.addEventListener('click', () => {
-    setActiveBottomTab(mobileCameraBtn);
-    // Open camera functionality
+function openGallery() {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*,video/*';
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.click();
+    
+    input.onchange = (e) => handleMediaUpload(e.target.files);
+}
+
+function openCamera() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
     input.capture = 'camera';
     input.click();
     
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            // Handle captured media
-            createNewStatus(file);
-        }
-    };
-});
+    input.onchange = (e) => handleMediaUpload(e.target.files);
+}
 
-mobileSettingsBtn.addEventListener('click', () => {
-    setActiveBottomTab(mobileSettingsBtn);
-    settingsPanel.classList.remove('hidden');
-    setTimeout(() => settingsPanel.classList.add('active'), 50);
-});
+function openDocuments() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.txt';
+    input.click();
+    
+    input.onchange = (e) => handleFileUpload(e.target.files[0]);
+}
 
-// Enhanced Settings Panel
-const darkModeToggle = document.getElementById('darkModeToggle');
-
-darkModeToggle.addEventListener('change', () => {
-    document.body.setAttribute('data-theme', darkModeToggle.checked ? 'dark' : 'light');
-});
-
-// Update settings visibility handler
-function updateSettingsVisibility(show) {
-    if (show) {
-        settingsPanel.classList.remove('hidden');
-        setTimeout(() => settingsPanel.classList.add('active'), 50);
-    } else {
-        settingsPanel.classList.remove('active');
-        setTimeout(() => settingsPanel.classList.add('hidden'), 300);
+async function shareLocation() {
+    try {
+        const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        
+        const messageData = {
+            type: 'location',
+            content: '📍 Shared a location',
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            senderId: currentUser.uid,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await db.collection('chats').doc(currentChat)
+            .collection('messages').add(messageData);
+    } catch (error) {
+        showToast('Error sharing location');
     }
 }
 
-// Update existing settings button handler
-settingsBtn.addEventListener('click', () => {
-    updateSettingsVisibility(true);
+// Enhanced Voice Recording
+let recordingTimer = null;
+let recordingStartTime = null;
+
+function updateRecordingTime() {
+    if (!recordingStartTime) return;
+    
+    const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+    document.querySelector('.recording-time').textContent = 
+        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+voiceRecordBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startRecording();
+    document.querySelector('.recording-ui').classList.remove('hidden');
+    recordingStartTime = Date.now();
+    recordingTimer = setInterval(updateRecordingTime, 1000);
 });
 
-closeSettings.addEventListener('click', () => {
-    updateSettingsVisibility(false);
+document.querySelector('.cancel-recording').addEventListener('click', () => {
+    stopRecording(true);
+    document.querySelector('.recording-ui').classList.add('hidden');
+    clearInterval(recordingTimer);
 });
 
-// Close settings panel when clicking outside
+document.querySelector('.send-recording').addEventListener('click', () => {
+    stopRecording();
+    document.querySelector('.recording-ui').classList.add('hidden');
+    clearInterval(recordingTimer);
+});
+
+// Improve message input on mobile
+messageInput.addEventListener('input', () => {
+    // Adjust input height based on content
+    messageInput.style.height = 'auto';
+    messageInput.style.height = Math.min(messageInput.scrollHeight, 80) + 'px';
+});
+
+// Handle attachment button on mobile
+attachmentBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const quickActions = document.querySelector('.quick-actions');
+    quickActions.style.display = 
+        quickActions.style.display === 'none' ? 'flex' : 'none';
+});
+
+// Add missing handleMediaUpload function
+async function handleMediaUpload(files) {
+    if (!files || !files.length) return;
+    
+    for (const file of files) {
+        try {
+            const storageRef = storage.ref(`chat-media/${currentChat}/${Date.now()}_${file.name}`);
+            const uploadTask = storageRef.put(file);
+            
+            uploadTask.on('state_changed',
+                null,
+                (error) => showToast('Error uploading media: ' + error.message),
+                async () => {
+                    const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                    const messageData = {
+                        type: 'media',
+                        content: file.type.startsWith('image/') ? '📷 Image' : '📹 Video',
+                        mediaUrl: downloadURL,
+                        mediaType: file.type,
+                        senderId: currentUser.uid,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    await db.collection('chats').doc(currentChat)
+                        .collection('messages').add(messageData);
+                }
+            );
+        } catch (error) {
+            showToast('Error processing media: ' + error.message);
+        }
+    }
+}
+
+// Add missing handleFileUpload function
+async function handleFileUpload(file) {
+    if (!file) return;
+    
+    try {
+        const storageRef = storage.ref(`chat-files/${currentChat}/${Date.now()}_${file.name}`);
+        const uploadTask = storageRef.put(file);
+        
+        uploadTask.on('state_changed',
+            null,
+            (error) => showToast('Error uploading file: ' + error.message),
+            async () => {
+                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                const messageData = {
+                    type: 'file',
+                    content: `📎 ${file.name}`,
+                    fileUrl: downloadURL,
+                    fileName: file.name,
+                    fileType: file.type,
+                    fileSize: file.size,
+                    senderId: currentUser.uid,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                await db.collection('chats').doc(currentChat)
+                    .collection('messages').add(messageData);
+            }
+        );
+    } catch (error) {
+        showToast('Error processing file: ' + error.message);
+    }
+}
+
+// Add missing shareContact function
+async function shareContact() {
+    // Create a temporary input for contact selection
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.vcf,.vcard';
+    
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+            const text = await file.text();
+            const messageData = {
+                type: 'contact',
+                content: '👤 Shared a contact',
+                contactData: text,
+                senderId: currentUser.uid,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            await db.collection('chats').doc(currentChat)
+                .collection('messages').add(messageData);
+        } catch (error) {
+            showToast('Error sharing contact');
+        }
+    };
+    
+    input.click();
+}
+
+// Add missing loadStatuses function
+async function loadStatuses() {
+    const twentyFourHoursAgo = new Date();
+    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+    
+    const statusesSnapshot = await db.collection('status')
+        .where('timestamp', '>', twentyFourHoursAgo)
+        .orderBy('timestamp', 'desc')
+        .get();
+    
+    const statusList = document.getElementById('statusList');
+    statusesSnapshot.forEach(doc => {
+        const statusData = doc.data();
+        if (statusData.userId !== currentUser.uid) {
+            const statusItem = createStatusItem(statusData);
+            statusList.appendChild(statusItem);
+        }
+    });
+}
+
+// Add missing setupEmojiPicker function
+function setupEmojiPicker() {
+    const emojiBtn = document.getElementById('emojiBtn');
+    if (!emojiBtn) return;
+    
+    emojiBtn.addEventListener('click', () => {
+        // Simple emoji list for demonstration
+        const emojis = ['😊', '😂', '❤️', '👍', '🎉', '🔥', '😎', '🤔'];
+        
+        const picker = document.createElement('div');
+        picker.className = 'emoji-picker';
+        picker.style.position = 'absolute';
+        picker.style.bottom = '100%';
+        picker.style.left = '0';
+        picker.style.background = 'var(--sidebar-light)';
+        picker.style.padding = '8px';
+        picker.style.borderRadius = '8px';
+        picker.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+        picker.style.display = 'grid';
+        picker.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        picker.style.gap = '8px';
+        
+        emojis.forEach(emoji => {
+            const button = document.createElement('button');
+            button.textContent = emoji;
+            button.style.fontSize = '20px';
+            button.style.border = 'none';
+            button.style.background = 'none';
+            button.style.cursor = 'pointer';
+            button.onclick = () => {
+                messageInput.textContent += emoji;
+                picker.remove();
+            };
+            picker.appendChild(button);
+        });
+        
+        emojiBtn.parentElement.appendChild(picker);
+        
+        // Close picker when clicking outside
+        document.addEventListener('click', function closePicker(e) {
+            if (!picker.contains(e.target) && e.target !== emojiBtn) {
+                picker.remove();
+                document.removeEventListener('click', closePicker);
+            }
+        });
+    });
+}
+
+// Enhanced Chat Input Handlers
+const sendBtn = document.getElementById('sendMessageBtn');
+const voiceBtn = document.getElementById('voiceRecordBtn');
+const attachBtn = document.getElementById('attachmentBtn');
+const quickActions = document.querySelector('.quick-actions');
+
+// Toggle send/voice button based on input
+messageInput.addEventListener('input', () => {
+    const hasText = messageInput.textContent.trim().length > 0;
+    sendBtn.classList.toggle('hidden', !hasText);
+    voiceBtn.classList.toggle('hidden', hasText);
+});
+
+// Handle attachment button
+attachBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    quickActions.classList.toggle('active');
+});
+
+// Close quick actions when clicking outside
 document.addEventListener('click', (e) => {
-    if (!settingsPanel.contains(e.target) && 
-        !settingsBtn.contains(e.target) && 
-        !mobileSettingsBtn.contains(e.target)) {
-        updateSettingsVisibility(false);
+    if (!quickActions.contains(e.target) && e.target !== attachBtn) {
+        quickActions.classList.remove('active');
     }
 });
+
+// Long press for voice recording
+let recordingTimeout;
+let isRecording = false;
+
+voiceBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    recordingTimeout = setTimeout(() => {
+        startRecording();
+        isRecording = true;
+        voiceBtn.classList.add('recording');
+    }, 500);
+});
+
+voiceBtn.addEventListener('touchend', () => {
+    if (isRecording) {
+        stopRecording();
+        voiceBtn.classList.remove('recording');
+        isRecording = false;
+    }
+    clearTimeout(recordingTimeout);
+});
+
+// Prevent scroll when recording
+voiceBtn.addEventListener('touchmove', (e) => {
+    if (isRecording) {
+        e.preventDefault();
+    }
+});
+
+// Handle input paste events
+messageInput.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+});
+
+// Auto-resize input
+const resizeInput = () => {
+    messageInput.style.height = 'auto';
+    messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+};
+
+messageInput.addEventListener('input', resizeInput);
+
+// Override default Enter behavior
+messageInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (messageInput.textContent.trim()) {
+            sendMessage();
+        }
+    }
+});
+
+// Make sure all DOM elements exist before adding event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize DOM elements with null checks
+    const emojiBtn = document.getElementById('emojiBtn');
+    const voiceBtn = document.getElementById('voiceRecordBtn');
+    const attachBtn = document.getElementById('attachmentBtn');
+    const quickActions = document.querySelector('.quick-actions');
+    const recordingUI = document.querySelector('.recording-ui');
+    const cancelRecordingBtn = document.querySelector('.cancel-recording');
+    const sendRecordingBtn = document.querySelector('.send-recording');
+
+    // Voice Recording Setup
+    if (voiceBtn) {
+        let recordingTimeout;
+        let isRecording = false;
+
+        voiceBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            recordingTimeout = setTimeout(() => {
+                startRecording();
+                isRecording = true;
+                voiceBtn.classList.add('recording');
+                if (recordingUI) {
+                    recordingUI.classList.remove('hidden');
+                }
+            }, 500);
+        });
+
+        voiceBtn.addEventListener('touchend', () => {
+            if (isRecording) {
+                stopRecording();
+                voiceBtn.classList.remove('recording');
+                isRecording = false;
+                if (recordingUI) {
+                    recordingUI.classList.add('hidden');
+                }
+            }
+            clearTimeout(recordingTimeout);
+        });
+    }
+
+    // Cancel and Send Recording Buttons
+    if (cancelRecordingBtn) {
+        cancelRecordingBtn.addEventListener('click', () => {
+            stopRecording(true);
+            if (recordingUI) {
+                recordingUI.classList.add('hidden');
+            }
+            clearInterval(recordingTimer);
+        });
+    }
+
+    if (sendRecordingBtn) {
+        sendRecordingBtn.addEventListener('click', () => {
+            stopRecording();
+            if (recordingUI) {
+                recordingUI.classList.add('hidden');
+            }
+            clearInterval(recordingTimer);
+        });
+    }
+
+    // Attachment Button
+    if (attachBtn && quickActions) {
+        attachBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            quickActions.classList.toggle('active');
+        });
+
+        // Close quick actions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!quickActions.contains(e.target) && e.target !== attachBtn) {
+                quickActions.classList.remove('active');
+            }
+        });
+    }
+
+    // Quick Action Buttons
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+        if (btn) {
+            btn.addEventListener('click', (e) => {
+                const action = e.currentTarget.textContent.trim();
+                handleQuickAction(action);
+            });
+        }
+    });
+
+    // Initialize Enhanced Features
+    initializeEnhancedFeatures();
+});
+
+// Helper function to handle quick actions
+function handleQuickAction(action) {
+    switch(action) {
+        case 'Photos & Videos':
+        case 'Photos':
+            openGallery();
+            break;
+        case 'Camera':
+            openCamera();
+            break;
+        case 'Document':
+        case 'Documents':
+            openDocuments();
+            break;
+        case 'Location':
+            shareLocation();
+            break;
+        case 'Contact':
+            shareContact();
+            break;
+        case 'Poll':
+            createPoll();
+            break;
+    }
+}
+
+// Add createPoll function
+function createPoll() {
+    showToast('Poll feature coming soon');
+}
+
+// Update initializeEnhancedFeatures function
+function initializeEnhancedFeatures() {
+    try {
+        setupVoiceRecording();
+        if (typeof loadStatuses === 'function') {
+            loadStatuses();
+        }
+        if (typeof setupEmojiPicker === 'function') {
+            setupEmojiPicker();
+        }
+    } catch (error) {
+        console.error('Error initializing features:', error);
+    }
+}
