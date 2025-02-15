@@ -828,3 +828,88 @@ function initializeEnhancedFeatures() {
 
 // Call initialization when app starts
 document.addEventListener('DOMContentLoaded', initializeEnhancedFeatures);
+
+// Mobile Navigation Handlers
+const mobileChatsBtn = document.getElementById('mobileChatsBtn');
+const mobileStatusBtn = document.getElementById('mobileStatusBtn');
+const mobileCameraBtn = document.getElementById('mobileCameraBtn');
+const mobileSettingsBtn = document.getElementById('mobileSettingsBtn');
+
+function setActiveBottomTab(activeButton) {
+    [mobileChatsBtn, mobileStatusBtn, mobileCameraBtn, mobileSettingsBtn].forEach(btn => {
+        btn.classList.remove('active');
+    });
+    activeButton.classList.add('active');
+}
+
+mobileChatsBtn.addEventListener('click', () => {
+    setActiveBottomTab(mobileChatsBtn);
+    sidebar.classList.add('active');
+    settingsPanel.classList.remove('active');
+    settingsPanel.classList.add('hidden');
+});
+
+mobileStatusBtn.addEventListener('click', () => {
+    setActiveBottomTab(mobileStatusBtn);
+    // Implement status view
+});
+
+mobileCameraBtn.addEventListener('click', () => {
+    setActiveBottomTab(mobileCameraBtn);
+    // Open camera functionality
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,video/*';
+    input.capture = 'camera';
+    input.click();
+    
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Handle captured media
+            createNewStatus(file);
+        }
+    };
+});
+
+mobileSettingsBtn.addEventListener('click', () => {
+    setActiveBottomTab(mobileSettingsBtn);
+    settingsPanel.classList.remove('hidden');
+    setTimeout(() => settingsPanel.classList.add('active'), 50);
+});
+
+// Enhanced Settings Panel
+const darkModeToggle = document.getElementById('darkModeToggle');
+
+darkModeToggle.addEventListener('change', () => {
+    document.body.setAttribute('data-theme', darkModeToggle.checked ? 'dark' : 'light');
+});
+
+// Update settings visibility handler
+function updateSettingsVisibility(show) {
+    if (show) {
+        settingsPanel.classList.remove('hidden');
+        setTimeout(() => settingsPanel.classList.add('active'), 50);
+    } else {
+        settingsPanel.classList.remove('active');
+        setTimeout(() => settingsPanel.classList.add('hidden'), 300);
+    }
+}
+
+// Update existing settings button handler
+settingsBtn.addEventListener('click', () => {
+    updateSettingsVisibility(true);
+});
+
+closeSettings.addEventListener('click', () => {
+    updateSettingsVisibility(false);
+});
+
+// Close settings panel when clicking outside
+document.addEventListener('click', (e) => {
+    if (!settingsPanel.contains(e.target) && 
+        !settingsBtn.contains(e.target) && 
+        !mobileSettingsBtn.contains(e.target)) {
+        updateSettingsVisibility(false);
+    }
+});

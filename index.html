@@ -130,30 +130,68 @@
             </div>
         </div>
 
-        <!-- Settings Panel -->
-        <div class="settings-panel hidden" id="settingsPanel">
-            <div class="settings-header">
-                <h3>Settings</h3>
-                <button id="closeSettings"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="settings-content">
-                <div class="setting-item">
+        <!-- Add Mobile Bottom Bar before closing app-container -->
+        <div class="mobile-bottom-bar">
+            <button id="mobileChatsBtn" class="active">
+                <i class="fas fa-comments"></i>
+                <span>Chats</span>
+            </button>
+            <button id="mobileStatusBtn">
+                <i class="fas fa-circle"></i>
+                <span>Status</span>
+            </button>
+            <button id="mobileCameraBtn">
+                <i class="fas fa-camera"></i>
+                <span>Camera</span>
+            </button>
+            <button id="mobileSettingsBtn">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modified Settings Panel -->
+    <div class="settings-panel hidden" id="settingsPanel">
+        <div class="settings-header">
+            <h3>Settings</h3>
+            <button id="closeSettings"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="settings-content">
+            <div class="setting-item">
+                <div class="setting-info">
+                    <i class="fas fa-bell"></i>
                     <span>Notifications</span>
-                    <label class="switch">
-                        <input type="checkbox" id="notificationToggle">                        npm init -y
-                        npm install express                        node server.js                        http://localhost:3000
-                        <span class="slider"></span>
-                    </label>
                 </div>
-                <div class="setting-item">
-                    <span>Sound Effects</span>
-                    <label class="switch">
-                        <input type="checkbox" id="soundToggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <button id="logoutBtn" class="logout-btn">Logout</button>
+                <label class="switch">
+                    <input type="checkbox" id="notificationToggle">
+                    <span class="slider"></span>
+                </label>
             </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <i class="fas fa-volume-up"></i>
+                    <span>Sound Effects</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="soundToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <i class="fas fa-moon"></i>
+                    <span>Dark Mode</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
         </div>
     </div>
 

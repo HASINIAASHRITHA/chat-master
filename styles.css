@@ -566,6 +566,64 @@ input:checked + .slider:before {
     #emojiBtn {
         display: none;
     }
+
+    .mobile-bottom-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background: var(--sidebar-light);
+        border-top: 1px solid var(--border-light);
+        z-index: 1000;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0 10px;
+    }
+
+    .mobile-bottom-bar button {
+        background: none;
+        border: none;
+        color: var(--text-light);
+        font-size: 1.4rem;
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .mobile-bottom-bar button span {
+        font-size: 0.7rem;
+    }
+
+    .mobile-bottom-bar button.active {
+        color: var(--primary-color);
+    }
+
+    /* Adjust settings panel for mobile */
+    .settings-panel {
+        width: 100%;
+        height: 100vh;
+        top: 0;
+        z-index: 2000;
+        transform: translateY(100%);
+    }
+
+    .settings-panel.active {
+        transform: translateY(0);
+    }
+
+    .chat-container {
+        padding-bottom: 60px; /* Add padding for mobile bottom bar */
+    }
+
+    /* Adjust chat area height */
+    .chat-area {
+        height: calc(100vh - 60px);
+    }
 }
 
 /* Small mobile devices */
@@ -857,4 +915,69 @@ input:checked + .slider:before {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(134, 150, 160, 0.3);
+}
+
+/* Mobile Bottom Bar */
+.mobile-bottom-bar {
+    display: none;
+}
+
+@media screen and (max-width: 768px) {
+    .mobile-bottom-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background: var(--sidebar-light);
+        border-top: 1px solid var(--border-light);
+        z-index: 1000;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0 10px;
+    }
+
+    .mobile-bottom-bar button {
+        background: none;
+        border: none;
+        color: var(--text-light);
+        font-size: 1.4rem;
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .mobile-bottom-bar button span {
+        font-size: 0.7rem;
+    }
+
+    .mobile-bottom-bar button.active {
+        color: var(--primary-color);
+    }
+
+    /* Adjust settings panel for mobile */
+    .settings-panel {
+        width: 100%;
+        height: 100vh;
+        top: 0;
+        z-index: 2000;
+        transform: translateY(100%);
+    }
+
+    .settings-panel.active {
+        transform: translateY(0);
+    }
+
+    .chat-container {
+        padding-bottom: 60px; /* Add padding for mobile bottom bar */
+    }
+
+    /* Adjust chat area height */
+    .chat-area {
+        height: calc(100vh - 60px);
+    }
 }
